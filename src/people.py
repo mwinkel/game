@@ -5,7 +5,7 @@ import tools
 import buildings
 
 
-class People:
+class People(object):
 	""" Base class for all people """
 	def __init__(self):
 		self.ticks = 0
@@ -57,8 +57,11 @@ class Worker(People):
 
 class Flattener(Worker): # Planierer
 	""" Flattens ground for building """
-	def __init__(self):
+	def __init__(self, worker=None):
 		Worker.__init__(self)
+                if worker:
+                    self.__dict__.update(worker.__dict__) # copy instance variables
+                
 		self.work_speed = 5
 		self.required_tool = tools.Spade
 
@@ -80,8 +83,11 @@ class Flattener(Worker): # Planierer
 
 
 class Builder(Worker): # Bauarbeiter
-	def __init__(self):
+	def __init__(self, worker=None):
 		Worker.__init__(self)
+                if worker:
+                    self.__dict__.update(worker.__dict__) # copy instance variables
+                
 		self.work_speed = 3
 		self.required_tool = tools.Hammer
 
@@ -103,8 +109,11 @@ class Builder(Worker): # Bauarbeiter
 
 
 class Lumberjack(Worker):
-	def __init__(self):
+	def __init__(self, worker=None):
 		Worker.__init__(self)
+                if worker:
+                    self.__dict__.update(worker.__dict__) # copy instance variables
+
 		self.work_speed = 35
 		self.required_tool = tools.Axe
 
@@ -124,7 +133,7 @@ def test_worker():
 
 def test_flattener():
 	print "Testing Flattener:"
-	f = Flattener()
+	f = Flattener(Worker())
 	print "\t" + str(f)
 	b = buildings.LumberjackHouse()
 	print "\t" + str(b)
@@ -148,7 +157,7 @@ def test_flattener():
 
 def test_builder():
 	print "Testing Builder:"
-	b = Builder()
+	b = Builder(Worker())
 	print "\t" + str(b)
 	h = buildings.LumberjackHouse()
 	h.built = 20

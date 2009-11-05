@@ -5,7 +5,7 @@ __date__ ="$Nov 5, 2009 3:09:20 PM$"
 import people
 
 
-class Building:
+class Building(object):
 	""" Base class for all buildings """
 	def __init__(self):
 		self.built = 0
@@ -96,15 +96,17 @@ def test_lumberjack_house2():
 	print "Testing Lumberjack House (2):"
 	house = LumberjackHouse()
 	print "\t" + str(house)
+
 	print ""
-	flattener = people.Flattener()
+	flattener = people.Flattener(people.Worker())
 	flattener.tool = tools.Spade()
 	house.inhabitant = flattener
 	print "\t" + str(house)
 	house.work(100)
 	print "\t" + str(house)
+
 	print ""
-	builder = people.Builder()
+	builder = people.Builder(flattener)
 	builder.tool = tools.Hammer()
 	house.inhabitant = builder
 	print "\t" + str(house)
@@ -112,8 +114,9 @@ def test_lumberjack_house2():
 	print "\t" + str(house)
 	house.work(250)
 	print "\t" + str(house)
+
 	print ""
-	lumberjack = people.Lumberjack()
+	lumberjack = people.Lumberjack(builder)
 	lumberjack.tool = tools.Axe()
 	house.inhabitant = lumberjack
 	print "\t" + str(house)
@@ -129,7 +132,7 @@ def test_lumberjack_house():
 	print "\t" + str(l)
 	l.built = 100
 	print "\t" + str(l)
-	l.inhabitant = people.Lumberjack()
+	l.inhabitant = people.Lumberjack(people.Worker())
 	print "\t" + str(l)
 	l.work(10)
 	l.work(10)

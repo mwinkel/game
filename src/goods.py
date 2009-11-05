@@ -5,7 +5,7 @@ if __name__ == "__main__":
 	print "Testcases here?";
 
 
-class Goods:
+class Goods(object):
 	""" Base class for all goods """
 	pass
 
