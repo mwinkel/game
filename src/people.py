@@ -30,14 +30,19 @@ class Worker(People):
 		self.tool = None
 		self.required_tool = None
 
-	def has_tool(self):
-		if self.required_tool == None: return False
-		
-		if isinstance(self.tool, self.required_tool):
-			return True
+	def __str__(self):
+		if self.has_tool():
+			return "Worker (Tool: " + str(self.tool) + " / Workspeed = " + str(self.work_speed) + ") : " + People.__str__(self)
 		else:
-			return False
+			return "Worker (Requires: " + str(self.require_tool()) + " / Workspeed = " + str(self.work_speed) + ") : " + People.__str__(self)
+	
+	def has_tool(self):
+		if self.required_tool:		
+			if isinstance(self.tool, self.required_tool):
+				return True
 
+		return False
+	
 	def require_tool(self):
 		if self.has_tool():
 			return None
@@ -47,11 +52,6 @@ class Worker(People):
 	def work(self, ticks, building):
 		pass
 
-	def __str__(self):
-		if self.has_tool():
-			return "Worker (Tool: " + str(self.tool) + " / Workspeed = " + str(self.work_speed) + ") : " + People.__str__(self)
-		else:
-			return "Worker (Requires: " + str(self.require_tool()) + " / Workspeed = " + str(self.work_speed) + ") : " + People.__str__(self)
 
 
 
@@ -59,15 +59,16 @@ class Flattener(Worker): # Planierer
 	""" Flattens ground for building """
 	def __init__(self):
 		Worker.__init__(self)
-		self.work_speed = 8
+		self.work_speed = 5
 		self.required_tool = tools.Spade
 
 	def work(self, ticks, building):
 		if self.has_tool() != True: return
-		
-		if ticks - self.ticks > self.work_speed:
+
+		diff = ticks - self.ticks
+		if diff > self.work_speed:
 			self.ticks = ticks
-			if building.built < 20:	building.built += 1
+			if building.built < 20:	building.built += (diff/self.work_speed)
 				
 
 	def __str__(self):
@@ -78,16 +79,17 @@ class Flattener(Worker): # Planierer
 class Builder(Worker): # Bauarbeiter
 	def __init__(self):
 		Worker.__init__(self)
-		self.work_speed = 5
+		self.work_speed = 3
 		self.required_tool = tools.Hammer
 
 	def work(self, ticks, building):
 		if self.has_tool() != True: return
 
-		if ticks - self.ticks > self.work_speed:
+		diff = ticks - self.ticks
+		if diff > self.work_speed:
 			self.ticks = ticks
 			if building.built > 19 and building.built < 100:
-				building.built += 1
+				building.built += (diff/self.work_speed)
 
 	def __str__(self):
 		return "Builder : " + Worker.__str__(self)
@@ -97,10 +99,14 @@ class Builder(Worker): # Bauarbeiter
 class Lumberjack(Worker):
 	def __init__(self):
 		Worker.__init__(self)
+		self.work_speed = 35
+		self.required_tool = tools.Axe
 
 	def __str__(self):
 		return "Lumberjack : " + Worker.__str__(self)
 
+	def work(self, ticks, building):
+		print "HACK HACK HACK"
 
 
 
@@ -130,8 +136,9 @@ def test_flattener():
 	print "\t" + str(f)
 	print ""
 	print "\t" + str(b)
-	for i in range(1,22): f.work(10*i, b)
-	print "\t" + str(b)
+	for i in range(1,22):
+		f.work(10*i, b)
+		print "\t" + str(b)
 
 def test_builder():
 	print "Testing Builder:"

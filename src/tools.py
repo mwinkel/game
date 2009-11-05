@@ -13,5 +13,8 @@ class Spade(Tool):
 class Hammer(Tool):
 	pass
 
+class Axe(Tool):
+	pass
+
 if __name__ == "__main__":
 	print "Testcases?";

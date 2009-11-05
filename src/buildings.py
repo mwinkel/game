@@ -8,9 +8,14 @@ class Building:
 	""" Base class for all buildings """
 	def __init__(self):
 		self.built = 0
+		self.inhabitant = None
+		self.required_people = None
 
 	def __str__(self):
-		return "Building ("  + str(self.built) + "% built / Needs: " + str(self.requires_people()) + ")"
+		if self.has_people():
+			return "Building ["  + str(self.built) + "% built] Inhabitant: " + str(self.inhabitant)
+		else:
+			return "Building ["  + str(self.built) + "% built] Needs: " + str(self.requires_people())
 
 	def is_flattened(self):
 		if self.built < 20:
@@ -23,15 +28,29 @@ class Building:
 			return False
 		else:
 			return True
-	
+
+	def has_people(self):
+		if self.required_people != None:
+			if isinstance(self.inhabitant, self.required_people):
+				return True
+		
+		return False
+
 	def requires_people(self):
 		""" returns what kind of people is desired by this building"""
-		if self.is_built():
+		if self.has_people():
 			return None
+		
+		if self.is_built():
+			return self.required_people
 		elif self.is_flattened():
 			return people.Builder
 		else:
 			return people.Flattener
+
+	def work(self, ticks):
+		if self.has_people():
+			self.inhabitant.work(ticks, self)
 
 
 
@@ -50,16 +69,10 @@ class LumberjackHouse(SmallBuilding):
 
 	def __init__(self):
 		SmallBuilding.__init__(self)
+		self.required_people = people.Lumberjack
 
 	def __str__(self):
 		return  "LumberjackHouse : " + SmallBuilding.__str__(self)
-
-	def requires_people(self):
-		if SmallBuilding.requires_people(self):
-			return SmallBuilding.requires_people(self)
-		else:
-			return people.Lumberjack
-
 
 
 
@@ -82,12 +95,20 @@ def test_lumberjack_house():
 	print "\t" + str(l)
 	l.built = 100
 	print "\t" + str(l)
+	l.inhabitant = people.Lumberjack()
+	print "\t" + str(l)
+	l.work(10)
+	l.work(10)
 
 	# fuer pool
-	print l.requires_people()
-	new_worker = l.requires_people()()
-	print new_worker
-	print isinstance(new_worker, l.requires_people())
+#	print "--pool--"
+#	l.inhabitant = None
+#	print l.requires_people()
+#	print l.has_people()
+#	print l
+#	new_worker = l.requires_people()()
+#	print new_worker
+#	print isinstance(new_worker, l.requires_people())
 
 if __name__ == "__main__":
 	test_building()
