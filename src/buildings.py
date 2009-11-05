@@ -1,3 +1,4 @@
+import tools
 __author__="Yves Adler"
 __date__ ="$Nov 5, 2009 3:09:20 PM$"
 
@@ -12,7 +13,7 @@ class Building:
 		self.required_people = None
 
 	def __str__(self):
-		if self.has_people():
+		if self.has_working_people() or self.has_building_people():
 			return "Building ["  + str(self.built) + "% built] Inhabitant: " + str(self.inhabitant)
 		else:
 			return "Building ["  + str(self.built) + "% built] Needs: " + str(self.requires_people())
@@ -29,16 +30,19 @@ class Building:
 		else:
 			return True
 
-	def has_people(self):
+	def has_working_people(self):
 		if self.required_people != None:
 			if isinstance(self.inhabitant, self.required_people):
 				return True
 		
 		return False
 
+	def has_building_people(self):
+		return isinstance(self.inhabitant, self.requires_people())
+
 	def requires_people(self):
 		""" returns what kind of people is desired by this building"""
-		if self.has_people():
+		if self.has_working_people():
 			return None
 		
 		if self.is_built():
@@ -49,8 +53,9 @@ class Building:
 			return people.Flattener
 
 	def work(self, ticks):
-		if self.has_people():
+		if self.has_working_people() or self.has_building_people():
 			self.inhabitant.work(ticks, self)
+
 
 
 
@@ -86,6 +91,35 @@ def test_building():
 	print "\tBuilding finished : " + str(b.is_built())
 	print "\tBuilding needs following people : " + str(b.requires_people())
 
+def test_lumberjack_house2():
+	print ""
+	print "Testing Lumberjack House (2):"
+	house = LumberjackHouse()
+	print "\t" + str(house)
+	print ""
+	flattener = people.Flattener()
+	flattener.tool = tools.Spade()
+	house.inhabitant = flattener
+	print "\t" + str(house)
+	house.work(100)
+	print "\t" + str(house)
+	print ""
+	builder = people.Builder()
+	builder.tool = tools.Hammer()
+	house.inhabitant = builder
+	print "\t" + str(house)
+	house.work(20)
+	print "\t" + str(house)
+	house.work(250)
+	print "\t" + str(house)
+	print ""
+	lumberjack = people.Lumberjack()
+	lumberjack.tool = tools.Axe()
+	house.inhabitant = lumberjack
+	print "\t" + str(house)
+	house.work(20)
+	print "\t" + str(house)
+
 def test_lumberjack_house():
 	print ""
 	print "Testing Lumberjack House:"
@@ -113,3 +147,4 @@ def test_lumberjack_house():
 if __name__ == "__main__":
 	test_building()
 	test_lumberjack_house()
+	test_lumberjack_house2()
