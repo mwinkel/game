@@ -91,7 +91,7 @@ class Builder(Worker): # Bauarbeiter
 		diff = ticks - self.ticks
 		if diff > self.work_speed:
 			self.ticks = ticks
-			if building.built > 19 and building.built < 100:
+			if building.built in range(20, 99):
 				building.built += (diff/self.work_speed)
 			
 			if building.built > 100:
