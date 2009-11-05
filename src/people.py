@@ -68,8 +68,11 @@ class Flattener(Worker): # Planierer
 		diff = ticks - self.ticks
 		if diff > self.work_speed:
 			self.ticks = ticks
-			if building.built < 20:	building.built += (diff/self.work_speed)
-				
+			if building.built < 20:
+				building.built += (diff/self.work_speed)
+			
+			if building.built > 100:
+				building.built = 100
 
 	def __str__(self):
 		return "Flattener : " + Worker.__str__(self)
@@ -90,6 +93,9 @@ class Builder(Worker): # Bauarbeiter
 			self.ticks = ticks
 			if building.built > 19 and building.built < 100:
 				building.built += (diff/self.work_speed)
+			
+			if building.built > 100:
+				building.built = 100
 
 	def __str__(self):
 		return "Builder : " + Worker.__str__(self)
