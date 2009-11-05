@@ -52,7 +52,7 @@ class LumberjackHouse(SmallBuilding):
 		SmallBuilding.__init__(self)
 
 	def __str__(self):
-		return  "Lumberjack : " + SmallBuilding.__str__(self)
+		return  "LumberjackHouse : " + SmallBuilding.__str__(self)
 
 	def requires_people(self):
 		if SmallBuilding.requires_people(self):

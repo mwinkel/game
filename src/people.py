@@ -27,15 +27,31 @@ class Worker(People):
 	def __init__(self):
 		People.__init__(self);
 		self.work_speed = 0
+		self.tool = None
+		self.required_tool = None
+
+	def has_tool(self):
+		if self.required_tool == None: return False
+		
+		if isinstance(self.tool, self.required_tool):
+			return True
+		else:
+			return False
 
 	def require_tool(self):
-		return None
-	
-	def work(self, building):
+		if self.has_tool():
+			return None
+		else:
+			return tools.Spade
+
+	def work(self, ticks, building):
 		pass
 
 	def __str__(self):
-		return "Worker (Requires: " + str(self.require_tool()) + " / Workspeed = " + str(self.work_speed) + ") : " + People.__str__(self)
+		if self.has_tool():
+			return "Worker (Tool: " + str(self.tool) + " / Workspeed = " + str(self.work_speed) + ") : " + People.__str__(self)
+		else:
+			return "Worker (Requires: " + str(self.require_tool()) + " / Workspeed = " + str(self.work_speed) + ") : " + People.__str__(self)
 
 
 
@@ -43,20 +59,15 @@ class Flattener(Worker): # Planierer
 	""" Flattens ground for building """
 	def __init__(self):
 		Worker.__init__(self)
-		self.work_speed = 5
-		self.tool = None
-
-	def require_tool(self):
-		if self.tool == None:
-			return tools.Spade
-		else:
-			return None
+		self.work_speed = 8
+		self.required_tool = tools.Spade
 
 	def work(self, ticks, building):
+		if self.has_tool() != True: return
+		
 		if ticks - self.ticks > self.work_speed:
 			self.ticks = ticks
-			if building.built < 20:
-				building.built += 1
+			if building.built < 20:	building.built += 1
 				
 
 	def __str__(self):
@@ -65,7 +76,23 @@ class Flattener(Worker): # Planierer
 
 
 class Builder(Worker): # Bauarbeiter
-	pass
+	def __init__(self):
+		Worker.__init__(self)
+		self.work_speed = 5
+		self.required_tool = tools.Hammer
+
+	def work(self, ticks, building):
+		if self.has_tool() != True: return
+
+		if ticks - self.ticks > self.work_speed:
+			self.ticks = ticks
+			if building.built > 19 and building.built < 100:
+				building.built += 1
+
+	def __str__(self):
+		return "Builder : " + Worker.__str__(self)
+
+
 
 class Lumberjack(Worker):
 	def __init__(self):
@@ -93,13 +120,46 @@ def test_flattener():
 	print ""
 	print "\tBeginning to work..."
 	print ""
-	for i in range(1,22):
-		f.work(10*i, b)
-		print "\t" + str(b)
+	print "\t" + str(b)
+	for i in range(1,22): f.work(10*i, b)
+	print "\t" + str(b)
 
+	f.tool = tools.Spade()
+	print ""
+	print "\tBeginning to work... (this time with tool)"
+	print "\t" + str(f)
+	print ""
+	print "\t" + str(b)
+	for i in range(1,22): f.work(10*i, b)
+	print "\t" + str(b)
+
+def test_builder():
+	print "Testing Builder:"
+	b = Builder()
+	print "\t" + str(b)
+	h = buildings.LumberjackHouse()
+	h.built = 20
+	print "\t" + str(h)
+
+	print ""
+	print "\tBeginning to work..."
+	print ""
+	print "\t" + str(h)
+	for i in range(1,22): b.work(10*i, h)
+	print "\t" + str(h)
+
+	b.tool = tools.Hammer()
+	print ""
+	print "\tBeginning to work... (this time with tool)"
+	print ""
+	print "\t" + str(h)
+	for i in range(1,102): b.work(10*i, h)
+	print "\t" + str(h)
 
 
 if __name__ == "__main__":
 	test_worker()
 	print ""
 	test_flattener()
+	print ""
+	test_builder()
