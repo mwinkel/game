@@ -1,3 +1,4 @@
+import copy
 import goods
 import tools
 __author__="Yves Adler"
@@ -9,16 +10,17 @@ import balance
 class Building(object):
 	""" Base class for all buildings """
 	def __init__(self):
-		self.built = 0.0
+		self._built = 0.0
 		self._building_time = 0.0
 		self._inhabitant = None
 		self._required_people = None
-		self._required_goods = None
-		self._building_costs = None
-		self._goods = None
+		self._required_goods = []
+		self._building_costs = []
+		self._consumed_materials = []
+		self._goods = []
 
 	def __str__(self):
-		return_string =  "Building ["  + str(self.built) + "% built]"
+		return_string =  "Building ["  + str(self._built) + "% built]"
 		
 		if self.has_working_people() or self.has_building_people():
 			return_string += " --- Inhabitant: " + str(self._inhabitant)
@@ -40,13 +42,13 @@ class Building(object):
 		self._goods.append(good)
 
 	def is_flattened(self):
-		if self.built < balance.PERCENT_UNTIL_FLATTENED:
+		if self._built < balance.PERCENT_UNTIL_FLATTENED:
 			return False
 		else:
 			return True
 
 	def is_built(self):
-		if self.built < 100:
+		if self._built < 100:
 			return False
 		else:
 			return True
@@ -58,15 +60,51 @@ class Building(object):
 		
 		return False
 
+	def has_build_material(self):
+		for j, cost in enumerate(self._building_costs):
+			for i, good in enumerate(self._goods):
+				if isinstance(good, cost):
+					return True
+
+		return False
+
 	def has_building_people(self):
 		if self.requires_people():
 			return isinstance(self._inhabitant, self.requires_people())
 		else:
 			return False
 
-
 	def get_building_time(self):
 		return self._building_time
+
+	def get_built_percent(self):
+		return self._built
+
+	def inc_built_percent(self, amount):
+		self._built += amount
+		if self._built > 100:
+			self._built = 100
+
+		build_step = (100 - balance.PERCENT_UNTIL_FLATTENED) / (len(self._building_costs) + len(self._consumed_materials))
+		next_step = 100 - len(self._building_costs) * build_step
+
+		if self._built >= next_step:
+			if self._goods:
+				good = self._goods.pop()
+				not_removed = True
+
+				for j, cost in enumerate(self._building_costs):
+					if isinstance(good, cost):
+						self._consumed_materials.append(cost)
+						self._building_costs.remove(cost)
+						not_removed = False
+
+				if not_removed:
+					self._goods.append(good)
+					self._built = next_step
+			else:
+				self._built = next_step
+
 
 	def set_inhabitant(self, inhabitant):
 		self._inhabitant = inhabitant
@@ -83,11 +121,22 @@ class Building(object):
 		else:
 			return people.Flattener
 
+	def __requires_build_goods(self):
+		still_required = copy.deepcopy(self._building_costs)
+		
+		for j, cost in enumerate(still_required):
+			for i, good in enumerate(self._goods):
+				if isinstance(good, cost):
+					still_required.remove(cost)
+					break
+					
+		return still_required
+
 	def requires_goods(self):
 		if self.is_built():
 			return self._required_goods
 		else:
-			return self._building_costs
+			return self.__requires_build_goods()
 
 	def work(self, ticks):
 		if self.has_working_people() or self.has_building_people():
@@ -224,8 +273,21 @@ def test_lumberjack_house():
 #	print new_worker
 #	print isinstance(new_worker, l.requires_people())
 
+def test_build_costs():
+	house = LumberjackHouse()
+	print house
+	house.add_good(goods.Plank())
+	print house
+	house.add_good(goods.Stone())
+	print house
+	house.add_good(goods.Stone())
+	print house
+	house.add_good(goods.Plank())
+	print house
+
 if __name__ == "__main__":
 #	test_building()
-	test_warehouse()
+#	test_warehouse()
 #	test_lumberjack_house()
-	test_lumberjack_house2()
+#	test_lumberjack_house2()
+	test_build_costs()

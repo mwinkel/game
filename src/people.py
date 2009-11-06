@@ -1,3 +1,4 @@
+import goods
 __author__="Yves Adler"
 __date__ ="$Nov 5, 2009 3:10:01 PM$"
 
@@ -83,11 +84,15 @@ class Flattener(Worker): # Planierer
 
 		if diff > work_speed:
 			self._ticks = ticks
-			if building.built < balance.PERCENT_UNTIL_FLATTENED:
-				building.built += (diff/work_speed) * (100.0/float(building.get_building_time()))
+			work_done = 0.0
+			
+			if building.get_built_percent() < balance.PERCENT_UNTIL_FLATTENED:
+				work_done += (diff/work_speed) * (100.0/float(building.get_building_time()))
 
-			if building.built > balance.PERCENT_UNTIL_FLATTENED:
-				building.built = balance.PERCENT_UNTIL_FLATTENED
+			if building.get_built_percent() + work_done > balance.PERCENT_UNTIL_FLATTENED:
+				work_done = balance.PERCENT_UNTIL_FLATTENED - building.get_built_percent()
+
+			building.inc_built_percent(work_done)
 
 
 	def __str__(self):
@@ -101,7 +106,7 @@ class Builder(Worker): # Bauarbeiter
                 if worker:
                     self.__dict__.update(worker.__dict__) # copy instance variables
                 
-		self._work_speed = 3
+		self._work_speed = 5
 		self._required_tool = tools.Hammer
 
 	def work(self, ticks, building):
@@ -112,11 +117,13 @@ class Builder(Worker): # Bauarbeiter
 
 		if diff > work_speed:
 			self._ticks = ticks
-			if building.built in range(balance.PERCENT_UNTIL_FLATTENED, 99):
-				building.built += (diff/work_speed) * (100.0/float(building.get_building_time()))
-			
-			if building.built > 100:
-				building.built = 100
+			work_done = 0.0
+
+			if building.get_built_percent() < 100 and building.has_build_material():
+				work_done += (diff/work_speed) * (100.0/float(building.get_building_time()))
+				
+			building.inc_built_percent(work_done)
+
 
 	def __str__(self):
 		return "Builder : " + Worker.__str__(self)
@@ -170,12 +177,29 @@ def test_flattener():
 		f.work(10*i, b)
 		print "\t" + str(b)
 
+def test_builder2():
+	print "Testing Builder2:"
+	b = Builder(Worker())
+	b.set_tool(tools.Hammer())
+	print "\t" + str(b)
+	h = buildings.LumberjackHouse()
+	h.inc_built_percent(20)
+
+	for i in range(1,100): b.work(i, h)
+	print "\t" + str(h)
+#	h.add_good(goods.Plank())
+#	h.add_good(goods.Plank())
+#	h.add_good(goods.Stone())
+#	h.add_good(goods.Stone())
+	for i in range(100,200): b.work(10*i, h)
+	print "\t" + str(h)
+
 def test_builder():
 	print "Testing Builder:"
 	b = Builder(Worker())
 	print "\t" + str(b)
 	h = buildings.LumberjackHouse()
-	h.built = 20
+	h.inc_built_percent(20)
 	print "\t" + str(h)
 
 	print ""
@@ -185,18 +209,32 @@ def test_builder():
 	for i in range(1,22): b.work(10*i, h)
 	print "\t" + str(h)
 
+	h.add_good(goods.Plank())
 	b.set_tool(tools.Hammer())
 	print ""
 	print "\tBeginning to work... (this time with tool)"
 	print ""
-	print "\t" + str(h)
-	for i in range(1,102): b.work(10*i, h)
-	print "\t" + str(h)
+	print "\t1" + str(h)
+	for i in range(1,102): b.work(220*i, h)
+	print "\t2" + str(h)
+	h.add_good(goods.Plank())
+	h.add_good(goods.Plank())
+	print h.has_build_material()
+	for i in range(102,202): b.work(2500*i, h)
+	print h.has_build_material()
+	print "\t3" + str(h)
+	h.add_good(goods.Stone())
+	h.add_good(goods.Plank())
+	h.add_good(goods.Plank())
+	h.add_good(goods.Stone())
+	for i in range(202,402): b.work(2500*i, h)
+	print "\t4" + str(h)
 
 
 if __name__ == "__main__":
-	test_worker()
+#	test_worker()
 	print ""
-	test_flattener()
+#	test_flattener()
 	print ""
-	test_builder()
+#	test_builder()
+	test_builder2()
