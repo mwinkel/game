@@ -1,25 +1,46 @@
+import goods
 import tools
 __author__="Yves Adler"
 __date__ ="$Nov 5, 2009 3:09:20 PM$"
 
 import people
-
+import balance
 
 class Building(object):
 	""" Base class for all buildings """
 	def __init__(self):
-		self.built = 0
-		self.inhabitant = None
-		self.required_people = None
+		self.built = 0.0
+		self._building_time = 0.0
+		self._inhabitant = None
+		self._required_people = None
+		self._required_goods = None
+		self._building_costs = None
+		self._goods = None
 
 	def __str__(self):
+		return_string =  "Building ["  + str(self.built) + "% built]"
+		
 		if self.has_working_people() or self.has_building_people():
-			return "Building ["  + str(self.built) + "% built] Inhabitant: " + str(self.inhabitant)
+			return_string += " --- Inhabitant: " + str(self._inhabitant)
 		else:
-			return "Building ["  + str(self.built) + "% built] Needs: " + str(self.requires_people())
+			return_string += " --- Needs people: " + str(self.requires_people())
+
+		if self.requires_goods():
+			return_string += " --- Needs goods: " +  str(self.requires_goods())
+		
+		return return_string
+
+	def accepts_goods(self):
+		if len(self._goods) < balance.MAX_GOODS_AT_BUILDING:
+			return True
+		else:
+			return False
+
+	def add_good(self, good):
+		self._goods.append(good)
 
 	def is_flattened(self):
-		if self.built < 20:
+		if self.built < balance.PERCENT_UNTIL_FLATTENED:
 			return False
 		else:
 			return True
@@ -31,36 +52,52 @@ class Building(object):
 			return True
 
 	def has_working_people(self):
-		if self.required_people != None:
-			if isinstance(self.inhabitant, self.required_people):
+		if self._required_people != None:
+			if isinstance(self._inhabitant, self._required_people):
 				return True
 		
 		return False
 
 	def has_building_people(self):
-		return isinstance(self.inhabitant, self.requires_people())
+		if self.requires_people():
+			return isinstance(self._inhabitant, self.requires_people())
+		else:
+			return False
 
+
+	def get_building_time(self):
+		return self._building_time
+
+	def set_inhabitant(self, inhabitant):
+		self._inhabitant = inhabitant
+	
 	def requires_people(self):
 		""" returns what kind of people is desired by this building"""
 		if self.has_working_people():
 			return None
 		
 		if self.is_built():
-			return self.required_people
+			return self._required_people
 		elif self.is_flattened():
 			return people.Builder
 		else:
 			return people.Flattener
 
+	def requires_goods(self):
+		if self.is_built():
+			return self._required_goods
+		else:
+			return self._building_costs
+
 	def work(self, ticks):
 		if self.has_working_people() or self.has_building_people():
-			self.inhabitant.work(ticks, self)
+			self._inhabitant.work(ticks, self)
 
 
 
 
 class SmallBuilding(Building):
-	""" Base class for small buildings """
+	""" Base class for small sized buildings """
 	def __init__(self):
 		Building.__init__(self)
 
@@ -69,20 +106,75 @@ class SmallBuilding(Building):
 
 
 
+class MediumBuilding(Building):
+	""" Base class for medium sized buildings """
+	def __init__(self):
+		Building.__init__(self)
+
+	def __str__(self):
+		return  "MediumBuilding : " +  Building.__str__(self)
+
+
+
+class LargeBuilding(Building):
+	""" Base class for large buildings """
+	def __init__(self):
+		Building.__init__(self)
+
+	def __str__(self):
+		return  "LargeBuilding : " +  Building.__str__(self)
+
+
+
 class LumberjackHouse(SmallBuilding):
 	""" Lumberjack building to get some wood """
 
 	def __init__(self):
 		SmallBuilding.__init__(self)
-		self.required_people = people.Lumberjack
+		self._required_people = people.Lumberjack
+		self._building_time = balance.BUILDTIME_LUMBERJACK_HOUSE
+		self._building_costs = balance.COSTS_LUMBERJACK_HOUSE
 
 	def __str__(self):
 		return  "LumberjackHouse : " + SmallBuilding.__str__(self)
 
 
+class Warehouse(MediumBuilding):
+	""" Lumberjack building to get some wood """
+
+	def __init__(self):
+		MediumBuilding.__init__(self)
+		self._required_people = None
+		self._building_time = balance.BUILDTIME_WAREHOUSE
+		self._building_costs = balance.COSTS_WAREHOUSE
+
+	def __str__(self):
+		return  "Warehouse : " + MediumBuilding.__str__(self)
 
 
 
+def test_build_house(house):
+	print ""
+	flattener = people.Flattener(people.Worker())
+	flattener.set_tool(tools.Spade())
+	house.set_inhabitant(flattener)
+	print "\t" + str(house)
+	house.work(200)
+	
+	print ""
+	builder = people.Builder(flattener)
+	builder.set_tool(tools.Hammer())
+	house.set_inhabitant(builder)
+	print "\t" + str(house)	
+	house.work(700)
+	print "\t" + str(house)
+
+def test_warehouse():
+	print "Testing Warehouse:"
+	house = Warehouse()
+	print "\t" + str(house)
+	test_build_house(house)
+	
 def test_building():
 	print "Testing Building:"
 	b = Building()
@@ -97,28 +189,13 @@ def test_lumberjack_house2():
 	house = LumberjackHouse()
 	print "\t" + str(house)
 
-	print ""
-	flattener = people.Flattener(people.Worker())
-	flattener.tool = tools.Spade()
-	house.inhabitant = flattener
-	print "\t" + str(house)
-	house.work(100)
-	print "\t" + str(house)
+	test_build_house(house)
 
 	print ""
-	builder = people.Builder(flattener)
-	builder.tool = tools.Hammer()
-	house.inhabitant = builder
-	print "\t" + str(house)
-	house.work(20)
-	print "\t" + str(house)
-	house.work(250)
-	print "\t" + str(house)
 
-	print ""
-	lumberjack = people.Lumberjack(builder)
-	lumberjack.tool = tools.Axe()
-	house.inhabitant = lumberjack
+	lumberjack = people.Lumberjack(people.Worker())
+	lumberjack.set_tool(tools.Axe())
+	house.set_inhabitant(lumberjack)
 	print "\t" + str(house)
 	house.work(20)
 	print "\t" + str(house)
@@ -132,7 +209,7 @@ def test_lumberjack_house():
 	print "\t" + str(l)
 	l.built = 100
 	print "\t" + str(l)
-	l.inhabitant = people.Lumberjack(people.Worker())
+	l.set_inhabitant(people.Lumberjack(people.Worker()))
 	print "\t" + str(l)
 	l.work(10)
 	l.work(10)
@@ -148,6 +225,7 @@ def test_lumberjack_house():
 #	print isinstance(new_worker, l.requires_people())
 
 if __name__ == "__main__":
-	test_building()
-	test_lumberjack_house()
+#	test_building()
+	test_warehouse()
+#	test_lumberjack_house()
 	test_lumberjack_house2()

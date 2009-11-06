@@ -9,10 +9,26 @@ class Goods(object):
 	""" Base class for all goods """
 	pass
 
+##########################################
+
 class Resource(Goods):
 	""" Base class for all 'natural' resources """
 	pass
 
+class Tree(Resource):
+	pass
+
+class Granite(Resource):
+	pass
+
+##########################################
+
 class Wood(Goods):
 	def __init__(self):
 		print "Stamm erstellt"
+
+class Plank(Goods):
+	pass
+
+class Stone(Goods):
+	pass
