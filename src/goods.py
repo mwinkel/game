@@ -1,11 +1,10 @@
+from gameobject import *
+
 __author__="Yves Adler"
 __date__ ="$Nov 5, 2009 3:10:01 PM$"
 
-if __name__ == "__main__":
-	print "Testcases here?";
 
-
-class Goods(object):
+class Goods(Gameobject):
 	""" Base class for all goods """
 	pass
 
@@ -24,11 +23,14 @@ class Granite(Resource):
 ##########################################
 
 class Wood(Goods):
-	def __init__(self):
-		print "Stamm erstellt"
+	pass
 
 class Plank(Goods):
 	pass
 
 class Stone(Goods):
 	pass
+
+
+if __name__ == "__main__":
+	print "Testcases here?";

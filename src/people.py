@@ -1,20 +1,27 @@
+from gameobject import Gameobject
+from PIL.ImImagePlugin import LUT
+from balance import WORKSPEED_FLATTENER
+from balance import WORKSPEED_BUILDER
+from balance import WORKSPEED_LUMBERJACK
+from gameobject import *
+from balance import *
+import tools
+import buildings
 import goods
+
 __author__="Yves Adler"
 __date__ ="$Nov 5, 2009 3:10:01 PM$"
 
-import tools
-import buildings
-import balance
 
-
-class People(object):
+class People(Gameobject):
 	""" Base class for all people """
 	def __init__(self):
+		Gameobject.__init__(self)
 		self._ticks = 0
-		self.walk_speed = 1
+		self.walk_speed = WALKSPEED_PEOPLE
 
 	def __str__(self):
-		return "People ( Walkspeed = " + str(self.walk_speed) + ")"
+		return "People ( Walkspeed = " + str(self.walk_speed) + ") : " + Gameobject.__str__(self)
 
 
 
@@ -23,6 +30,16 @@ class Soldier(People):
 	pass
 
 
+class Carrier(People):
+	""" Carriers are transporting goods from A to B """
+	def __init__(self):
+		People.__init__(self);
+
+	def move_to_target(self, ticks):
+		pass
+
+	def __str__(self):
+		return "Carrier : " + People.__str__(self)
 
 class Worker(People):
 	""" Base class for all working people """
@@ -73,7 +90,7 @@ class Flattener(Worker): # Planierer
                 if worker:
                     self.__dict__.update(worker.__dict__) # copy instance variables
                 
-		self._work_speed = 5
+		self._work_speed = WORKSPEED_FLATTENER
 		self._required_tool = tools.Spade
 
 	def work(self, ticks, building):
@@ -86,11 +103,11 @@ class Flattener(Worker): # Planierer
 			self._ticks = ticks
 			work_done = 0.0
 			
-			if building.get_built_percent() < balance.PERCENT_UNTIL_FLATTENED:
+			if building.get_built_percent() < PERCENT_UNTIL_FLATTENED:
 				work_done += (diff/work_speed) * (100.0/float(building.get_building_time()))
 
-			if building.get_built_percent() + work_done > balance.PERCENT_UNTIL_FLATTENED:
-				work_done = balance.PERCENT_UNTIL_FLATTENED - building.get_built_percent()
+			if building.get_built_percent() + work_done > PERCENT_UNTIL_FLATTENED:
+				work_done = PERCENT_UNTIL_FLATTENED - building.get_built_percent()
 
 			building.inc_built_percent(work_done)
 
@@ -106,7 +123,7 @@ class Builder(Worker): # Bauarbeiter
                 if worker:
                     self.__dict__.update(worker.__dict__) # copy instance variables
                 
-		self._work_speed = 5
+		self._work_speed = WORKSPEED_BUILDER
 		self._required_tool = tools.Hammer
 
 	def work(self, ticks, building):
@@ -136,7 +153,7 @@ class Lumberjack(Worker):
                 if worker:
                     self.__dict__.update(worker.__dict__) # copy instance variables
 
-		self._work_speed = 35
+		self._work_speed = WORKSPEED_LUMBERJACK
 		self._required_tool = tools.Axe
 
 	def __str__(self):
@@ -187,10 +204,10 @@ def test_builder2():
 
 	for i in range(1,100): b.work(i, h)
 	print "\t" + str(h)
-#	h.add_good(goods.Plank())
-#	h.add_good(goods.Plank())
-#	h.add_good(goods.Stone())
-#	h.add_good(goods.Stone())
+	h.add_good(goods.Plank())
+	h.add_good(goods.Plank())
+	h.add_good(goods.Stone())
+	h.add_good(goods.Stone())
 	for i in range(100,200): b.work(10*i, h)
 	print "\t" + str(h)
 
@@ -238,3 +255,7 @@ if __name__ == "__main__":
 	print ""
 #	test_builder()
 	test_builder2()
+
+	print "---"
+	c = Carrier()
+	print c

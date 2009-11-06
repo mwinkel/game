@@ -1,13 +1,15 @@
+from gameobject import *
 import copy
 import goods
 import tools
-__author__="Yves Adler"
-__date__ ="$Nov 5, 2009 3:09:20 PM$"
-
 import people
 import balance
 
-class Building(object):
+__author__="Yves Adler"
+__date__ ="$Nov 5, 2009 3:09:20 PM$"
+
+
+class Building(Gameobject):
 	""" Base class for all buildings """
 	def __init__(self):
 		self._built = 0.0
@@ -61,8 +63,8 @@ class Building(object):
 		return False
 
 	def has_build_material(self):
-		for j, cost in enumerate(self._building_costs):
-			for i, good in enumerate(self._goods):
+		for cost in self._building_costs:
+			for good in self._goods:
 				if isinstance(good, cost):
 					return True
 
@@ -93,7 +95,7 @@ class Building(object):
 				good = self._goods.pop()
 				not_removed = True
 
-				for j, cost in enumerate(self._building_costs):
+				for cost in self._building_costs:
 					if isinstance(good, cost):
 						self._consumed_materials.append(cost)
 						self._building_costs.remove(cost)
@@ -108,6 +110,7 @@ class Building(object):
 
 	def set_inhabitant(self, inhabitant):
 		self._inhabitant = inhabitant
+		print self.__str__()
 	
 	def requires_people(self):
 		""" returns what kind of people is desired by this building"""
@@ -124,8 +127,8 @@ class Building(object):
 	def __requires_build_goods(self):
 		still_required = copy.deepcopy(self._building_costs)
 		
-		for j, cost in enumerate(still_required):
-			for i, good in enumerate(self._goods):
+		for cost in still_required:
+			for good in self._goods:
 				if isinstance(good, cost):
 					still_required.remove(cost)
 					break
