@@ -1,5 +1,4 @@
 from gameobject import Gameobject
-from PIL.ImImagePlugin import LUT
 from balance import WORKSPEED_FLATTENER
 from balance import WORKSPEED_BUILDER
 from balance import WORKSPEED_LUMBERJACK
