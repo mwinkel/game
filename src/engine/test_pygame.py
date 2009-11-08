@@ -4,12 +4,13 @@
 __author__="Yves Adler"
 __date__ ="$Nov 7, 2009 8:00:32 PM$"
 
+from engine.test_console import Console
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
 import pygame
-from gloss import *
 from pygame.locals import * # events und co
+import test_console
 
 
 class PyGfxEngine:
@@ -24,7 +25,7 @@ class PyGfxEngine:
 
 		self.__init_opengl()
 		self.__resize_window(screen_size)
-
+                self.console = Console(self._window)
 
 	def __del__(self):
 		pygame.quit()
@@ -89,6 +90,8 @@ class PyGfxEngine:
 
 	def run(self):
 		""" main eninge loop """
+                print self.console.__str__()
+                
 		while self._running:
 
 			self.input(pygame.event.get())
