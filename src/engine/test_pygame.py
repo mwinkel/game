@@ -29,7 +29,7 @@ class PyGfxEngine:
 		pygame.quit()
 
 	def __init_opengl(self):
-		# todo: was ist wirklich benoetigt?
+		# TODO: was ist wirklich benoetigt?
 		glEnable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
@@ -45,6 +45,7 @@ class PyGfxEngine:
 		glAlphaFunc(GL_NOTEQUAL,0.0)
 
 	def __resize_window(self, (width, height)):
+		# TODO: wie kann man das nu dynamisch resizen?
 		glViewport(0, 0, width, height)
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
@@ -73,13 +74,11 @@ class PyGfxEngine:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 		glLoadIdentity()
 		
-		glTranslatef(0,0,-6.0)
 		glColor3f(0,1,0)
-		self.draw_point(-1, 0, 0)
+		self.draw_point(-1, 0, -6)
 
-		glTranslatef(0,0,-6.0)
 		glColor3f(0,1,1)
-		self.draw_point(1, 0, 0)
+		self.draw_point(1, 0, -6)
 
 		#Draw on Screen
 		
