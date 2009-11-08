@@ -8,7 +8,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 import pygame
-import test_console
+from gloss import *
 from pygame.locals import * # events und co
 
 
@@ -21,9 +21,6 @@ class PyGfxEngine:
 		pygame.display.set_caption('PyGfxEngine Test')
 		screen_size = (640,480)
 		self._window = pygame.display.set_mode(screen_size, OPENGL|DOUBLEBUF)
-                self.console = test_console.Console(
-                                                self._window,
-                                                (0,0,screen_size[0],150))
 
 		self.__init_opengl()
 		self.__resize_window(screen_size)
@@ -64,9 +61,8 @@ class PyGfxEngine:
 				self._running = False
 				break
                         elif event.type == KEYDOWN:
-                                if (event.key == K_c):
-                                        self.console.activate()
-
+                                if (event.key == K_ESCAPE):
+                                        self._running = False
 			else:
 				print event
 
@@ -89,7 +85,6 @@ class PyGfxEngine:
 		self.draw_point(1, 0, -6)
 
 		#Draw on Screen
-		self.console.draw()
 		pygame.display.flip()
 
 	def run(self):
